@@ -28,3 +28,11 @@ __MACOSX/
 
 # Large datasets
 interview-assignment.zip
+
+# Private Presentation & Prep Drafts
+presentation_script.md
+video_demo_script.md
+qa_preparation.md
+ingestion_and_genai_explanations.md
+interactive_guide_setup.md
+walkthrough.md
