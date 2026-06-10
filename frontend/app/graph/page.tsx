@@ -10,6 +10,7 @@ interface GraphNode {
   y?: number;
   vx?: number;
   vy?: number;
+  pinned?: boolean;
 }
 
 interface GraphEdge {
@@ -24,6 +25,7 @@ export default function KnowledgeGraphPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
@@ -33,6 +35,7 @@ export default function KnowledgeGraphPage() {
   const dragStartRef = useRef({ x: 0, y: 0 });
   const activeNodeRef = useRef<GraphNode | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
+  const alphaRef = useRef(1.0);
   
   const fetchGraphData = async () => {
     try {
@@ -51,12 +54,14 @@ export default function KnowledgeGraphPage() {
         x: n.x ?? (Math.random() - 0.5) * 400 + 400,
         y: n.y ?? (Math.random() - 0.5) * 300 + 300,
         vx: 0,
-        vy: 0
+        vy: 0,
+        pinned: false
       }));
 
       setNodes(initializedNodes);
       setEdges(json.edges);
       setSelectedNode(null);
+      alphaRef.current = 1.0;
     } catch (err) {
       console.error(err);
     } finally {
@@ -106,6 +111,10 @@ export default function KnowledgeGraphPage() {
     const gravity = 0.05;
 
     const stepSimulation = () => {
+      if (isPaused || alphaRef.current < 0.005) {
+        return;
+      }
+
       const w = canvas.width / 2;
       const h = canvas.height / 2;
       const center = { x: w / 2, y: h / 2 };
@@ -125,10 +134,14 @@ export default function KnowledgeGraphPage() {
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
             
-            n1.vx = n1.vx! - fx;
-            n1.vy = n1.vy! - fy;
-            n2.vx = n2.vx! + fx;
-            n2.vy = n2.vy! + fy;
+            if (!n1.pinned) {
+              n1.vx = n1.vx! - fx;
+              n1.vy = n1.vy! - fy;
+            }
+            if (!n2.pinned) {
+              n2.vx = n2.vx! + fx;
+              n2.vy = n2.vy! + fy;
+            }
           }
         }
       }
@@ -147,17 +160,25 @@ export default function KnowledgeGraphPage() {
           const fx = (dx / dist) * force;
           const fy = (dy / dist) * force;
           
-          nSource.vx = nSource.vx! + fx;
-          nSource.vy = nSource.vy! + fy;
-          nTarget.vx = nTarget.vx! - fx;
-          nTarget.vy = nTarget.vy! - fy;
+          if (!nSource.pinned) {
+            nSource.vx = nSource.vx! + fx;
+            nSource.vy = nSource.vy! + fy;
+          }
+          if (!nTarget.pinned) {
+            nTarget.vx = nTarget.vx! - fx;
+            nTarget.vy = nTarget.vy! - fy;
+          }
         }
       });
 
       // 3. Gravity towards center & update positions
       nodes.forEach(n => {
-        // Dragging node locks it
-        if (n === activeNodeRef.current) return;
+        // Dragging node or pinned node locks it
+        if (n === activeNodeRef.current || n.pinned) {
+          n.vx = 0;
+          n.vy = 0;
+          return;
+        }
 
         const gdx = center.x - n.x!;
         const gdy = center.y - n.y!;
@@ -171,6 +192,9 @@ export default function KnowledgeGraphPage() {
         n.x = n.x! + n.vx!;
         n.y = n.y! + n.vy!;
       });
+
+      // Apply cooling decay
+      alphaRef.current *= 0.96;
     };
 
     const drawGraph = () => {
@@ -227,6 +251,14 @@ export default function KnowledgeGraphPage() {
           ctx.stroke();
         }
 
+        // Draw an inner white core if node is pinned
+        if (n.pinned) {
+          ctx.beginPath();
+          ctx.arc(n.x!, n.y!, 2.2, 0, 2 * Math.PI);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+        }
+
         // Draw Label Text
         ctx.fillStyle = selectedNode && n.id !== selectedNode.id ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.9)";
         ctx.font = n.type === "Meeting" ? "bold 8px sans-serif" : "6px sans-serif";
@@ -251,7 +283,8 @@ export default function KnowledgeGraphPage() {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
     };
-  }, [loading, nodes, edges, selectedNode]);
+  }, [loading, nodes, edges, selectedNode, isPaused]);
+
 
   // Convert canvas event coordinate to world coordinates
   const getWorldCoords = (clientX: number, clientY: number) => {
@@ -296,6 +329,7 @@ export default function KnowledgeGraphPage() {
       activeNodeRef.current.y = coords.y;
       activeNodeRef.current.vx = 0;
       activeNodeRef.current.vy = 0;
+      alphaRef.current = 1.0; // Reheat simulation during dragging
     } else if (isDraggingRef.current) {
       transformRef.current = {
         ...transformRef.current,
@@ -306,8 +340,36 @@ export default function KnowledgeGraphPage() {
   };
 
   const handleMouseUp = () => {
+    if (activeNodeRef.current) {
+      activeNodeRef.current.pinned = true; // Pin node on drag release
+      alphaRef.current = 1.0; // Settle neighbors
+    }
     activeNodeRef.current = null;
     isDraggingRef.current = false;
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const coords = getWorldCoords(e.clientX, e.clientY);
+    let clickedNode: GraphNode | null = null;
+    for (const n of nodes) {
+      const radius = 15;
+      const dx = n.x! - coords.x;
+      const dy = n.y! - coords.y;
+      if (dx * dx + dy * dy < radius * radius) {
+        clickedNode = n;
+        break;
+      }
+    }
+    if (clickedNode) {
+      const nextPinned = !clickedNode.pinned;
+      clickedNode.pinned = nextPinned;
+      // Sync React state
+      setNodes(prev => prev.map(n => n.id === clickedNode!.id ? { ...n, pinned: nextPinned } : n));
+      if (selectedNode && selectedNode.id === clickedNode.id) {
+        setSelectedNode(prev => prev ? { ...prev, pinned: nextPinned } : null);
+      }
+      alphaRef.current = 1.0; // Reheat
+    }
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -329,8 +391,25 @@ export default function KnowledgeGraphPage() {
       x: (Math.random() - 0.5) * 400 + 400,
       y: (Math.random() - 0.5) * 300 + 300,
       vx: 0,
-      vy: 0
+      vy: 0,
+      pinned: false
     })));
+    alphaRef.current = 1.0;
+  };
+
+  const unpinAllNodes = () => {
+    setNodes(prev => prev.map(n => ({ ...n, pinned: false })));
+    if (selectedNode) {
+      setSelectedNode(prev => prev ? { ...prev, pinned: false } : null);
+    }
+    alphaRef.current = 1.0;
+  };
+
+  const toggleNodePin = (node: GraphNode) => {
+    const nextPinned = !node.pinned;
+    setNodes(prev => prev.map(n => n.id === node.id ? { ...n, pinned: nextPinned } : n));
+    setSelectedNode(prev => prev && prev.id === node.id ? { ...prev, pinned: nextPinned } : prev);
+    alphaRef.current = 1.0;
   };
 
   return (
@@ -353,8 +432,26 @@ export default function KnowledgeGraphPage() {
             className="flex-1 md:w-64 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
           />
           <button 
+            onClick={() => setIsPaused(prev => !prev)}
+            className={`px-3 py-2 text-xs font-semibold border rounded-xl transition-all cursor-pointer ${
+              isPaused 
+                ? "bg-emerald-600/20 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30" 
+                : "bg-amber-600/20 border-amber-500/30 text-amber-400 hover:bg-amber-600/30"
+            }`}
+            title={isPaused ? "Resume physics simulation" : "Pause physics simulation"}
+          >
+            {isPaused ? "▶ Run Physics" : "⏸ Pause Physics"}
+          </button>
+          <button 
+            onClick={unpinAllNodes}
+            className="px-3 py-2 text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
+            title="Release all pinned nodes"
+          >
+            📍 Unpin All
+          </button>
+          <button 
             onClick={resetZoom}
-            className="px-4 py-2 text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
+            className="px-3 py-2 text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
           >
             Reset Graph
           </button>
@@ -376,6 +473,7 @@ export default function KnowledgeGraphPage() {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
+              onDoubleClick={handleDoubleClick}
               onWheel={handleWheel}
               className="flex-1 w-full h-full cursor-grab active:cursor-grabbing block"
             />
@@ -392,8 +490,9 @@ export default function KnowledgeGraphPage() {
           </div>
           
           <div className="absolute top-4 left-4 text-[9px] text-slate-500 pointer-events-none select-none">
-            🖱️ Drag nodes to organize • Scroll to Zoom • Click node to inspect details
+            🖱️ Drag nodes to organize (pins position) • Double-click node to Pin/Unpin • Scroll to Zoom
           </div>
+
         </div>
 
         {/* Node Inspector Sidebar */}
@@ -417,6 +516,18 @@ export default function KnowledgeGraphPage() {
                     {selectedNode.label}
                   </h4>
                   <p className="text-[10px] text-slate-500 font-medium mt-1">ID: {selectedNode.id}</p>
+                  
+                  {/* Pin/Unpin control in Inspector */}
+                  <button
+                    onClick={() => toggleNodePin(selectedNode)}
+                    className={`mt-3 w-full py-1.5 px-3 border rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center ${
+                      selectedNode.pinned
+                        ? "bg-amber-600/10 border-amber-500/20 text-amber-400 hover:bg-amber-600/20"
+                        : "bg-indigo-600/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-600/20"
+                    }`}
+                  >
+                    {selectedNode.pinned ? "📍 Pinned (Click to Unpin)" : "📌 Pin Node Position"}
+                  </button>
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-slate-850">
