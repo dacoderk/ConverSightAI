@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  --background: #090d16;
+  --foreground: #f8fafc;
+  --primary: #6366f1;
+  --primary-glow: rgba(99, 102, 241, 0.15);
+  --border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(17, 24, 39, 0.6);
+  --card-border: rgba(255, 255, 255, 0.06);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Custom UI Utilities */
+.glass-panel {
+  background: rgba(17, 25, 40, 0.65);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.18);
+  transform: translateY(-2px);
+}
+
+.glow-btn {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.45);
+  transition: all 0.2s ease;
+}
+
+.glow-btn:hover {
+  box-shadow: 0 6px 24px 0px rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px);
+}
+
+.glow-text {
+  text-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s infinite ease-in-out;
+}

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Cache Service (Redis)
+  cache:
+    image: redis:alpine
+    container_name: conversight-cache
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --loglevel warning
+
+  # Backend API Service (FastAPI + DuckDB)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: conversight-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=cache
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      # Mount the dataset read-only so the ingestion script can read it
+      - ./interview-assignment:/interview-assignment:ro
+      # Persist the DuckDB database file
+      - db-data:/app/data
+    depends_on:
+      - cache
+
+  # Frontend Web Service (NextJS)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: conversight-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    depends_on:
+      - backend
+
+volumes:
+  db-data:

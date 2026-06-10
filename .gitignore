@@ -1,0 +1,30 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/
+.cursor/
+.agents/
+.jetro/
+__MACOSX/
+*.log
+
+# Large datasets
+interview-assignment.zip

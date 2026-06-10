@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConverSight AI Presentation — Business Insights</title>
+
+    <!-- Typography: Clash Display for Headings, Satoshi for Body -->
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@800,700,600&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (NEON CYBER THEME)
+           =========================================== */
+        :root {
+            --bg-primary: #070a13;
+            --bg-secondary: #0b1120;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #00ffcc;
+            --accent-magenta: #ff00aa;
+            --accent-glow: rgba(0, 255, 204, 0.25);
+            --accent-magenta-glow: rgba(255, 0, 170, 0.25);
+            --border: rgba(255, 255, 255, 0.08);
+
+            --font-display: 'Clash Display', system-ui, -apple-system, sans-serif;
+            --font-body: 'Satoshi', system-ui, -apple-system, sans-serif;
+
+            --title-size: clamp(2rem, 5.5vw, 4.5rem);
+            --subtitle-size: clamp(0.95rem, 1.6vw, 1.25rem);
+            --h2-size: clamp(1.5rem, 3.8vw, 2.5rem);
+            --h3-size: clamp(1.1rem, 2.4vw, 1.5rem);
+            --body-size: clamp(0.75rem, 1.3vw, 1.05rem);
+            --small-size: clamp(0.6rem, 1vw, 0.8rem);
+
+            --slide-padding: clamp(1.5rem, 5vw, 4.5rem);
+            --content-gap: clamp(1rem, 2.2vh, 2.5rem);
+            --element-gap: clamp(0.4rem, 1.2vh, 1.2rem);
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.8s;
+        }
+
+        /* ===========================================
+           VIEWPORT FITTING: MANDATORY BASE STYLES
+           =========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden; /* Prevent ANY scrollbars within slides */
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        visibility var(--duration-normal) var(--ease-out-expo);
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            padding: var(--slide-padding);
+            gap: var(--content-gap);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Responsive constraints for containers */
+        .container {
+            max-width: min(90vw, 1200px);
+            max-height: min(75vh, 650px);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: clamp(0.75rem, 1.5vw, 1.5rem);
+            max-width: 100%;
+        }
+
+        /* ===========================================
+           NEON CYBER SIGNATURE STYLING
+           =========================================== */
+        /* Grid background pattern */
+        .cyber-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center;
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Abstract glowing circles */
+        .neon-glow-circle {
+            position: absolute;
+            width: clamp(200px, 40vw, 500px);
+            height: clamp(200px, 40vw, 500px);
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 0;
+            animation: float-slow 20s infinite ease-in-out;
+        }
+
+        .neon-glow-circle.cyan {
+            background-color: var(--accent);
+            top: -10%;
+            left: -10%;
+        }
+
+        .neon-glow-circle.magenta {
+            background-color: var(--accent-magenta);
+            bottom: -15%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 20px) scale(1.1); }
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-magenta) 100%);
+            box-shadow: 0 0 10px var(--accent);
+            transition: width 0.3s var(--ease-out-expo);
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: clamp(1rem, 3vw, 2.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            transform: scale(1.3);
+            border-color: var(--bg-primary);
+        }
+
+        /* Header Slide Index indicator */
+        .slide-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: var(--element-gap);
+            margin-bottom: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .slide-header .brand {
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slide-header .brand-icon {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-magenta) 100%);
+            border-radius: 4px;
+        }
+
+        /* ===========================================
+           TYPOGRAPHY & CARD COMPONENTS
+           =========================================== */
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: var(--title-size);
+            background: linear-gradient(135deg, #ffffff 30%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: var(--h2-size);
+            color: #ffffff;
+        }
+
+        h3 {
+            font-size: var(--h3-size);
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: var(--subtitle-size);
+            color: var(--text-secondary);
+            max-width: 800px;
+            line-height: 1.4;
+        }
+
+        .cyber-card {
+            background: rgba(11, 17, 32, 0.45);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: clamp(1rem, 2vw, 1.75rem);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cyber-card:hover {
+            border-color: rgba(0, 255, 204, 0.25);
+            box-shadow: 0 8px 30px -10px rgba(0, 255, 204, 0.12);
+        }
+
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .cyber-card.magenta::before {
+            background: var(--accent-magenta);
+        }
+
+        .cyber-card:hover.magenta {
+            border-color: rgba(255, 0, 170, 0.25);
+            box-shadow: 0 8px 30px -10px rgba(255, 0, 170, 0.12);
+        }
+
+        .card-number {
+            font-family: var(--font-display);
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-weight: 700;
+        }
+
+        .bullet-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+            list-style: none;
+        }
+
+        .bullet-list li {
+            font-size: var(--body-size);
+            line-height: 1.5;
+            color: var(--text-secondary);
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: clamp(9px, 1.2vw, 11px);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            color: var(--accent);
+        }
+
+        /* ===========================================
+           TRANSITIONS & ANIMATIONS (REVEAL)
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.active .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal:nth-child(1) { transition-delay: 0.1s; }
+        .reveal:nth-child(2) { transition-delay: 0.25s; }
+        .reveal:nth-child(3) { transition-delay: 0.4s; }
+        .reveal:nth-child(4) { transition-delay: 0.55s; }
+
+        .slide-footer {
+            margin-top: auto;
+            font-size: clamp(10px, 1.2vw, 12px);
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: var(--element-gap);
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .slide-footer .hint {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===========================================
+           RESPONSIVE HEIGHT ADJUSTMENTS
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1rem, 3vw, 2rem);
+                --content-gap: clamp(0.75rem, 1.5vh, 1.5rem);
+            }
+            .cyber-card {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-height: 580px) {
+            .slide-header, .slide-footer, .nav-dots {
+                display: none !important;
+            }
+        }
+
+        /* Utility classes replacement for Tailwind CSS classes used in presentation */
+        .text-center { text-align: center; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .text-\[11px\] { font-size: 11px; }
+        .text-\[12px\] { font-size: 12px; }
+        .text-slate-500 { color: #64748b; }
+        .text-slate-400 { color: #94a3b8; }
+        .text-white { color: #ffffff; }
+        .font-semibold { font-weight: 600; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        .bg-slate-900\/60 { background-color: rgba(15, 23, 42, 0.6); }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .border { border: 1px solid var(--border); }
+        .border-slate-800 { border-color: rgba(30, 41, 59, 0.8); }
+        .rounded-full { border-radius: 9999px; }
+        .text-rose-400 { color: #fb7185; }
+        .text-indigo-400 { color: #818cf8; }
+        .glow-text {
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress Indicator -->
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Right Side Dots -->
+    <nav class="nav-dots" id="navDots"></nav>
+
+    <!-- Background Decoration -->
+    <div class="cyber-grid"></div>
+    <div class="neon-glow-circle cyan"></div>
+    <div class="neon-glow-circle magenta"></div>
+
+
+    <!-- ===========================================
+       SLIDE 1: TITLE SLIDE
+       =========================================== -->
+    <section class="slide active" id="slide-1">
+        <div class="slide-content text-center items-center justify-center">
+            <div class="tag-pill reveal">Product Pitch & Architecture</div>
+            <h1 class="reveal glow-text" style="line-height: 1.0; margin-top: 10px;">ConverSight AI</h1>
+            <p class="subtitle reveal text-center mt-3" style="max-width: 600px;">
+                Enterprise-Grade Conversation Intelligence Platform turning transcripts into real-time business insights.
+            </p>
+            <div class="reveal mt-6 text-[11px] text-slate-500 font-semibold uppercase tracking-widest bg-slate-900/60 px-4 py-2 border border-slate-800 rounded-full">
+                🚀 Multi-Agent • DuckDB • RAG • Graph
+            </div>
+            
+            <div class="slide-footer">
+                <span>Enterprise Tech Stack Demo</span>
+                <span class="hint">Press SPACE or arrow keys to navigate</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 2: THE BUSINESS PROBLEM
+       =========================================== -->
+    <section class="slide" id="slide-2">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 02 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">The B2B Dialogue Gap</h2>
+                <p class="subtitle reveal">
+                    Organizations record support tickets, customer success calls, and engineering standups daily. Yet, leadership remains blind to the recurring themes and patterns.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card reveal">
+                        <div class="card-number">01</div>
+                        <h3>Information Silos</h3>
+                        <p class="text-[12px] text-slate-400">Support tickets, renewal feedback, and bug logs remain stored in separate directories with no cross-relation.</p>
+                    </div>
+                    <div class="cyber-card reveal">
+                        <div class="card-number">02</div>
+                        <h3>No Proactive Alerts</h3>
+                        <p class="text-[12px] text-slate-400">Account health decline or competitive threats are only realized after customer churn has already occurred.</p>
+                    </div>
+                    <div class="cyber-card reveal">
+                        <div class="card-number">03</div>
+                        <h3>Manual Synthesis</h3>
+                        <p class="text-[12px] text-slate-400">Teams spend hours weekly listening to transcripts to aggregate feature requests and product complaints.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Conversational Intelligence Solution</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 3: PLATFORM ARCHITECTURE
+       =========================================== -->
+    <section class="slide" id="slide-3">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 03 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Production AI Data Ingestion</h2>
+                <p class="subtitle reveal">
+                    A self-contained Docker Compose architecture that parses raw customer turns, performs entity extraction, and indexes data for sub-millisecond retrieval.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card magenta reveal">
+                        <h3>1. Ingestion & Validation</h3>
+                        <p class="text-[12px] text-slate-400">Parses JSON speaker meta files, timestamps, and transcripts, flagging missing fields or corrupt data records.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <h3>2. DuckDB Warehouse</h3>
+                        <p class="text-[12px] text-slate-400">Acts as our embedded analytical database storing meetings, transcript turns, key moments, and action items.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <h3>3. Redis Cache</h3>
+                        <p class="text-[12px] text-slate-400">Caches heavy dashboard aggregates and RAG query outputs, yielding instant load speeds for executives.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Multi-Service Stack Deployment</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 4: INSIGHT 1 - CHURN RISK
+       =========================================== -->
+    <section class="slide" id="slide-4">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 04 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Customer Health & Churn Risk</h2>
+                <p class="subtitle reveal">
+                    By synthesizing average call sentiment scores, support ticket frequency, and open action items, we proactively flag accounts in danger of canceling.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card reveal" style="border-left-color: #f43f5e;">
+                        <span class="tag-pill" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.2); color: #f43f5e;">High Risk</span>
+                        <h3 class="mt-2 text-white">Summit Trust</h3>
+                        <p class="text-[12px] text-slate-400">Disputed a 200-seat overage on their January invoice. Migration test accounts were left undeprovisioned.</p>
+                    </div>
+                    <div class="cyber-card reveal" style="border-left-color: #f43f5e;">
+                        <span class="tag-pill" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.2); color: #f43f5e;">High Risk</span>
+                        <h3 class="mt-2 text-white">Northstar Pharma</h3>
+                        <p class="text-[12px] text-slate-400">Concerned about regulatory SLA compliance after experiencing platform downtime on the Detect module.</p>
+                    </div>
+                    <div class="cyber-card reveal" style="border-left-color: #f59e0b;">
+                        <span class="tag-pill" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #f59e0b;">Medium Risk</span>
+                        <h3 class="mt-2 text-white">Trailhead Marketplace</h3>
+                        <p class="text-[12px] text-slate-400">Reported a critical incident where security alerts failed to trigger during their platform upgrade.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Proactive Churn Prediction Insights</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 5: INSIGHT 2 - PRODUCT PRIORITIES
+       =========================================== -->
+    <section class="slide" id="slide-5">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 05 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Product Risk Heatmap</h2>
+                <p class="subtitle reveal">
+                    We parse conversation text to prioritize developer workloads based on customer impact, separating bugs from feature gaps.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card reveal">
+                        <h3 class="text-rose-400">Top Repeating Bugs</h3>
+                        <ul class="bullet-list mt-2">
+                          <li><b>SSO Login Failures</b> (Authentication, 12 occurrences)</li>
+                          <li><b>LDAP Active Directory Sync Lag</b> (Provisioning, 9 occurrences)</li>
+                          <li><b>AWS S3 Backup Connector Timeout</b> (Infrastructure, 8 occurrences)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="cyber-card reveal">
+                        <h3 class="text-indigo-400">Prioritized Feature Requests</h3>
+                        <ul class="bullet-list mt-2">
+                          <li><b>Custom Compliance Templates</b> (Regulatory, 15 votes)</li>
+                          <li><b>Bulk Deprovisioning Tool</b> (User Management, 11 votes)</li>
+                          <li><b>Proactive Seat Threshold Alerts</b> (Billing, 8 votes)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Product Intelligence Feed</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 6: INSIGHT 3 - COMPETITIVE INTELLIGENCE
+       =========================================== -->
+    <section class="slide" id="slide-6">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 06 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Competitor Win-Loss Metrics</h2>
+                <p class="subtitle reveal">
+                    Automatically scans transcripts to isolate competitor mentions, providing product and marketing teams with real threat signals.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card magenta reveal">
+                        <div class="card-number">30x</div>
+                        <h3>Okta Market Threat</h3>
+                        <p class="text-[12px] text-slate-400">Okta is the most discussed competitor. Conversations focus heavily on active Okta migrations and SSO integrations.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <div class="card-number">Active</div>
+                        <h3>Entra & AD Integrations</h3>
+                        <p class="text-[12px] text-slate-400">Microsoft Entra is mentioned repeatedly as a key blocker. Resolving integration lag is vital to win contracts.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <div class="card-number">MFA</div>
+                        <h3>Duo / Ping Configuration</h3>
+                        <p class="text-[12px] text-slate-400">Mentioned during multi-factor authentication (MFA) setup discussions. Customers seek seamless cross-platform support.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Competitor Mentions and Threat Analysis</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 7: ACTION ITEMS CENTER
+       =========================================== -->
+    <section class="slide" id="slide-7">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 07 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Automated Action Items Center</h2>
+                <p class="subtitle reveal">
+                    No task gets dropped. Our ingestion engine parses deliverables, identifies owners, extracts deadlines, and tracks execution status.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card reveal">
+                        <h3>Extraction Heuristics</h3>
+                        <p class="text-[12px] text-slate-400">Extracts task clauses from transcripts and automatically attributes ownership (e.g. support agents vs customer contacts).</p>
+                    </div>
+                    <div class="cyber-card reveal">
+                        <h3>State Management</h3>
+                        <p class="text-[12px] text-slate-400">Allows users to dynamically transition action items between **Open**, **Closed**, and **Blocked** directly on the dashboard page.</p>
+                    </div>
+                    <div class="cyber-card reveal">
+                        <h3>Deadline Mapping</h3>
+                        <p class="text-[12px] text-slate-400">Scans context for terms like "before Friday billing" or "within 5 business days" to assign schedule deadlines.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Action Item Accountability Track</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 8: KNOWLEDGE GRAPH
+       =========================================== -->
+    <section class="slide" id="slide-8">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 08 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Relational Knowledge Graph</h2>
+                <p class="subtitle reveal">
+                    Visualizes relationships between Meetings, Speakers, Products, Competitors, and Topics. Users can explore neighborhoods to isolate connections.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card magenta reveal">
+                        <h3>Relational Schema</h3>
+                        <p class="text-[12px] text-slate-400">Maintains relational nodes and edges tables in DuckDB representing connections like `Speaker DISCUSSES Topic`.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <h3>2D Force Simulation</h3>
+                        <p class="text-[12px] text-slate-400">Rendered on an HTML5 Canvas using standard particle physics (gravity, attraction, repulsion) inside a render loop.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <h3>Responsive Explorer</h3>
+                        <p class="text-[12px] text-slate-400">Supports mouse-wheel zooming, click-and-drag panning, node manipulation, and detail queries in a side pane.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Interactive Semantic Graph</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 9: AI COPILOT
+       =========================================== -->
+    <section class="slide" id="slide-9">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 09 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">RAG-Powered AI Copilot</h2>
+                <p class="subtitle reveal">
+                    A conversational RAG query interface that answers business questions using transcripts as context, returning answers with source citations.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card reveal">
+                        <h3>Hybrid Retrieval</h3>
+                        <p class="text-[12px] text-slate-400">Blends BM25-style keyword search over DuckDB tables with local vector similarity to fetch highly relevant sentences.</p>
+                    </div>
+                    <div class="cyber-card reveal">
+                        <h3>Gemini LLM Integration</h3>
+                        <p class="text-[12px] text-slate-400">If `GEMINI_API_KEY` is set, calls Gemini 1.5 Flash to synthesize answers with precise bracketed citations.</p>
+                    </div>
+                    <div class="cyber-card reveal">
+                        <h3>Offline Fallback</h3>
+                        <p class="text-[12px] text-slate-400">Runs fully offline using pre-analyzed caching templates if API keys are not provided, protecting data confidentiality.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>Conversational Semantic Search RAG</span>
+                <span>ConverSight AI</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE 10: VALUE RECOMMENDATIONS
+       ========================================== -->
+    <section class="slide" id="slide-10">
+        <div class="slide-content">
+            <div class="slide-header">
+                <span class="brand"><span class="brand-icon"></span> ConverSight AI</span>
+                <span>Slide 10 / 10</span>
+            </div>
+            
+            <div class="container">
+                <h2 class="reveal">Unlocking Strategic Value</h2>
+                <p class="subtitle reveal">
+                    How leadership can utilize the ConverSight platform to improve customer retention, prioritize features, and win competitive deals.
+                </p>
+                
+                <div class="grid mt-2">
+                    <div class="cyber-card magenta reveal">
+                        <h3>Prevent Customer Churn</h3>
+                        <p class="text-[12px] text-slate-400">Schedule review calls with Summit Trust and Northstar Pharma. Set seat limit alerts to prevent future billing discrepancies.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <h3>Align Developer Roadmaps</h3>
+                        <p class="text-[12px] text-slate-400">Fix SSO login failures and build custom compliance templates to satisfy our top customer requests.</p>
+                    </div>
+                    <div class="cyber-card magenta reveal">
+                        <h3>Enable Sales Positioning</h3>
+                        <p class="text-[12px] text-slate-400">Equip Account Managers with Okta migration templates and competitive positioning sheets based on win-loss logs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>ConverSight AI • Deliverables and Presentation</span>
+                <span>End of Presentation</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       SLIDE PRESENTATION JS CONTROLLER
+       =========================================== -->
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.progressBar = document.getElementById('progressBar');
+                this.navDotsContainer = document.getElementById('navDots');
+                
+                this.init();
+            }
+
+            init() {
+                // Generate navigation dots dynamically
+                this.slides.forEach((slide, idx) => {
+                    const dot = document.createElement('div');
+                    dot.className = `nav-dot ${idx === 0 ? 'active' : ''}`;
+                    dot.title = `Go to slide ${idx + 1}`;
+                    dot.addEventListener('click', () => this.goToSlide(idx));
+                    this.navDotsContainer.appendChild(dot);
+                });
+
+                // Listeners
+                document.addEventListener('keydown', this.handleKeyDown.bind(this));
+                window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
+                
+                // Touch Swipe Listeners
+                let touchStartY = 0;
+                let touchEndX = 0;
+                let touchStartYLocal = 0;
+                
+                document.addEventListener('touchstart', (e) => {
+                    touchStartY = e.changedTouches[0].clientY;
+                });
+                document.addEventListener('touchend', (e) => {
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const diffY = touchStartY - touchEndY;
+                    if (Math.abs(diffY) > 50) {
+                        if (diffY > 0) this.next();
+                        else this.prev();
+                    }
+                });
+
+                // Set initial progress
+                this.updateProgress();
+            }
+
+            goToSlide(idx) {
+                if (idx < 0 || idx >= this.slides.length || idx === this.currentSlide) return;
+                
+                // Remove active classes
+                this.slides[this.currentSlide].classList.remove('active');
+                
+                // Set current
+                this.currentSlide = idx;
+                
+                // Add active classes
+                this.slides[this.currentSlide].classList.add('active');
+                
+                // Update dots
+                const dots = document.querySelectorAll('.nav-dot');
+                dots.forEach((dot, dotIdx) => {
+                    if (dotIdx === idx) dot.classList.add('active');
+                    else dot.classList.remove('active');
+                });
+
+                this.updateProgress();
+            }
+
+            next() {
+                if (this.currentSlide < this.slides.length - 1) {
+                    this.goToSlide(this.currentSlide + 1);
+                }
+            }
+
+            prev() {
+                if (this.currentSlide > 0) {
+                    this.goToSlide(this.currentSlide - 1);
+                }
+            }
+
+            updateProgress() {
+                const percentage = (this.currentSlide / (this.slides.length - 1)) * 100;
+                this.progressBar.style.width = `${percentage}%`;
+            }
+
+            handleKeyDown(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                    case ' ':
+                    case 'PageDown':
+                        e.preventDefault();
+                        this.next();
+                        break;
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                    case 'PageUp':
+                        e.preventDefault();
+                        this.prev();
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        this.goToSlide(0);
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        this.goToSlide(this.slides.length - 1);
+                        break;
+                }
+            }
+
+            // Debounce wheel scroll
+            handleWheel(e) {
+                e.preventDefault();
+                if (this.wheelTimeout) return;
+                
+                this.wheelTimeout = setTimeout(() => {
+                    this.wheelTimeout = null;
+                }, 800);
+
+                if (e.deltaY > 10) {
+                    this.next();
+                } else if (e.deltaY < -10) {
+                    this.prev();
+                }
+            }
+        }
+
+        // Initialize presentation
+        new SlidePresentation();
+    </script>
+</body>
+</html>

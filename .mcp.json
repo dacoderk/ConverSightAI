@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "jetro": {
+      "type": "stdio",
+      "command": "/Users/nikola/.jetro/runtime/node-darwin-arm64",
+      "args": [
+        "/Users/nikola/.jetro/mcp-server/index.js"
+      ],
+      "env": {
+        "JET_WORKSPACE": "/Users/nikola/Downloads/ConverSight AI",
+        "JET_API_URL": "https://api.jetro.ai",
+        "PATH": "/Users/nikola/.jetro/runtime:/Users/nikola/.antigravity-ide/antigravity-ide/bin:/Users/nikola/.local/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.bun/bin:/Users/nikola/.bun/bin:/Users/nikola/.antigravity/antigravity/bin:/Users/nikola/.nvm/versions/node/v24.15.0/bin:/Users/nikola/.local/bin:/Users/nikola/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Users/nikola/.orbstack/bin:/usr/local/go/bin:/opt/homebrew/bin"
+      }
+    }
+  }
+}
