@@ -28,6 +28,7 @@ __MACOSX/
 
 # Large datasets
 interview-assignment.zip
+*.db
 
 # Private Presentation & Prep Drafts
 presentation_script.md
